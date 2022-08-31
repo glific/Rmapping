@@ -54,7 +54,7 @@ location_query <- 'WITH events AS (SELECT title, type, category, status, descrip
 locations AS (SELECT name, CAST(latitude AS FLOAT8) AS lat, CAST(longitude AS FLOAT8) AS long, address, city, state, district FROM "tabLocations")
 SELECT * FROM events LEFT JOIN locations ON location = name'
 
-get_data <- function() {
+frappe_data <- function() {
   dbGetQuery(con, location_query)
 }
 
@@ -182,7 +182,7 @@ server <- function(input, output, session) {
   
   bqdata <- reactivePoll(10000, session,
                        checkFunc = check_for_update,
-                       valueFunc = get_data)
+                       valueFunc = frappe_data)
   # Here we are observing the cluster input
   # If we click on the cluster it tries to cluster all the data points
   # Otherwise it will remove the marker
@@ -299,15 +299,15 @@ server <- function(input, output, session) {
                                              measurementOptions =
                                                measurePathOptions(imperial = TRUE)
                                            ),
-                                           group = "district_boundaries"
+                                           group = "District Boundaries"
       ) %>%
-      hideGroup(group = "district_boundaries") %>%
+      hideGroup(group = "District Boundaries") %>%
       # This is to add control layers on the map
       leaflet::addLayersControl(
         position = "bottomleft",
         baseGroups = c("Light"),
         overlayGroups =
-          c("district_boundaries"),
+          c("District Boundaries"),
         options = layersControlOptions(collapsed = TRUE)
       )
   })
