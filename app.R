@@ -179,15 +179,15 @@ ui <- dashboardPage(
 
 
 server <- function(input, output, session) {
-
-  data <- reactivePoll(10000, session,
+  
+  bqdata <- reactivePoll(10000, session,
                        checkFunc = check_for_update,
                        valueFunc = get_data)
   # Here we are observing the cluster input
   # If we click on the cluster it tries to cluster all the data points
   # Otherwise it will remove the marker
   observe({
-    filtered_data <- get_data() %>%
+    filtered_data <- bqdata() %>%
       dplyr::filter(
         if ("All" %in% input$category) {
           category != ""
@@ -217,7 +217,7 @@ server <- function(input, output, session) {
   # If we click on the Heatmap it shows the density of the data points
   # Otherwise it will remove the Heatmap
   observe({
-    filtered_data <- get_data() %>%
+    filtered_data <- bqdata() %>%
       dplyr::filter(
         if ("All" %in% input$category) {
           category != ""
@@ -239,13 +239,13 @@ server <- function(input, output, session) {
       proxy %>% clearHeatmap()
     }
   })
-
+  
   # This we need to auto connect the server.
   session$allowReconnect(TRUE)
-
+  
   # This is the main map where we render leaflet map
   output$layer_data <- renderLeaflet({
-    filtered_data <- get_data() %>%
+    filtered_data <- bqdata() %>%
       dplyr::filter(
         if ("All" %in% input$category) {
           category != ""
@@ -277,29 +277,29 @@ server <- function(input, output, session) {
       leaflet.extras::addSearchGoogle(searchOptions(autoCollapse = FALSE, minLength = 8)) %>%
       # This is to add assembly boundaries and to be able to popup the information
       leaflet.extras::addGeoJSONChoropleth(json_data,
-        valueProperty = "AREASQMI",
-        scale = c("white", "red"),
-        mode = "q",
-        steps = 4,
-        padding = c(0.2, 0),
-        labelProperty = "name",
-        popupProperty = propstoHTMLTable(
-          props = c("name", "description", "altitudeMode", "extrude"),
-          table.attrs = list(class = "table table-striped table-bordered"),
-          drop.na = TRUE
-        ),
-        color = "#43a858", weight = 1, fillOpacity = 0.7,
-        highlightOptions = highlightOptions(
-          weight = 2, color = "#9c4e57",
-          fillOpacity = 1, opacity = 1,
-          bringToFront = TRUE, sendToBack = TRUE
-        ),
-        pathOptions = pathOptions(
-          showMeasurements = TRUE,
-          measurementOptions =
-            measurePathOptions(imperial = TRUE)
-        ),
-        group = "district_boundaries"
+                                           valueProperty = "AREASQMI",
+                                           scale = c("white", "red"),
+                                           mode = "q",
+                                           steps = 4,
+                                           padding = c(0.2, 0),
+                                           labelProperty = "name",
+                                           popupProperty = propstoHTMLTable(
+                                             props = c("name", "description", "altitudeMode", "extrude"),
+                                             table.attrs = list(class = "table table-striped table-bordered"),
+                                             drop.na = TRUE
+                                           ),
+                                           color = "#43a858", weight = 1, fillOpacity = 0.7,
+                                           highlightOptions = highlightOptions(
+                                             weight = 2, color = "#9c4e57",
+                                             fillOpacity = 1, opacity = 1,
+                                             bringToFront = TRUE, sendToBack = TRUE
+                                           ),
+                                           pathOptions = pathOptions(
+                                             showMeasurements = TRUE,
+                                             measurementOptions =
+                                               measurePathOptions(imperial = TRUE)
+                                           ),
+                                           group = "district_boundaries"
       ) %>%
       hideGroup(group = "district_boundaries") %>%
       # This is to add control layers on the map
