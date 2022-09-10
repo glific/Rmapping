@@ -81,9 +81,9 @@ frappe_data <- function() {
 }
 
 # Reading all the data for Assembly level boundaries from Frappe DB
-assembly_boundaries <- 
-  DBI::dbGetQuery(con, 'SELECT json FROM "boundaries" where id = 3')
-json_data <- assembly_boundaries$json
+# assembly_boundaries <- 
+#   DBI::dbGetQuery(con, 'SELECT json FROM "boundaries" where id = 3')
+# json_data <- assembly_boundaries$json
 
 
 # List of distinct category Names. We filter this from 
@@ -134,8 +134,8 @@ ui_box <- shiny::bootstrapPage(
       ),
       hr(),
       checkboxInput("heat", "Heatmap", FALSE),
-      checkboxInput("cluster", "Clustering", TRUE),
-      checkboxInput("district", "District Boundaries", FALSE)
+      checkboxInput("cluster", "Clustering", TRUE)
+      # checkboxInput("district", "District Boundaries", FALSE)
     )
   )
 )
@@ -223,38 +223,38 @@ server <- function(input, output, session) {
   # It will check the input box district and remove the geoJson based on
   # the input
 
-  shiny::observe({
-    proxy <- leaflet::leafletProxy("render_map")
+  # shiny::observe({
+  #   proxy <- leaflet::leafletProxy("render_map")
 
-    if (input$district) {
-      proxy %>% leaflet.extras::addGeoJSONChoropleth(json_data,
-        valueProperty = "AREASQMI",
-        scale = c("white", "red"),
-        mode = "q",
-        steps = 4,
-        padding = c(0.2, 0),
-        labelProperty = "name",
-        popupProperty = propstoHTMLTable(
-          props = c("name", "description", "altitudeMode", "extrude"),
-          table.attrs = list(class = "table table-striped table-bordered"),
-          drop.na = TRUE
-        ),
-        color = "#43a858", weight = 1, fillOpacity = 0.7,
-        highlightOptions = highlightOptions(
-          weight = 2, color = "#9c4e57",
-          fillOpacity = 1, opacity = 1,
-          bringToFront = TRUE, sendToBack = TRUE
-        ),
-        pathOptions = pathOptions(
-          showMeasurements = TRUE,
-          measurementOptions =
-            measurePathOptions(imperial = TRUE)
-        )
-      )
-    } else {
-      proxy %>% clearGeoJSON()
-    }
-  })
+  #   if (input$district) {
+  #     proxy %>% leaflet.extras::addGeoJSONChoropleth(json_data,
+  #       valueProperty = "AREASQMI",
+  #       scale = c("white", "red"),
+  #       mode = "q",
+  #       steps = 4,
+  #       padding = c(0.2, 0),
+  #       labelProperty = "name",
+  #       popupProperty = propstoHTMLTable(
+  #         props = c("name", "description", "altitudeMode", "extrude"),
+  #         table.attrs = list(class = "table table-striped table-bordered"),
+  #         drop.na = TRUE
+  #       ),
+  #       color = "#43a858", weight = 1, fillOpacity = 0.7,
+  #       highlightOptions = highlightOptions(
+  #         weight = 2, color = "#9c4e57",
+  #         fillOpacity = 1, opacity = 1,
+  #         bringToFront = TRUE, sendToBack = TRUE
+  #       ),
+  #       pathOptions = pathOptions(
+  #         showMeasurements = TRUE,
+  #         measurementOptions =
+  #           measurePathOptions(imperial = TRUE)
+  #       )
+  #     )
+  #   } else {
+  #     proxy %>% clearGeoJSON()
+  #   }
+  # })
 
   # Here we are observing the cluster input
   # If we click on the cluster it tries to cluster all the data points
