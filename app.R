@@ -199,7 +199,7 @@ geosearch <- basicPage(
 
 ui <- dashboardPage(
   skin = c("green"),
-  dashboardHeader(title = "GeoLocation"),
+  dashboardHeader(title = "Samaaj Data"),
   dashboardSidebar(disable = TRUE),
   dashboardBody(
     tabItem(
