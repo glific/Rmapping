@@ -83,7 +83,7 @@ frappe_data <- function() {
 # Reading all the data for Assembly level boundaries from Frappe DB
 ac_boundary_name <- "dfa50ab58f"
 assembly_boundaries <-
-  DBI::dbGetQuery(con, "SELECT key FROM \"tabBoundaries\" tab where key = 'AC Boundary'")
+  DBI::dbGetQuery(con, "SELECT json FROM \"tabBoundaries\" tab where key = 'AC Boundary'")
 json_data <- assembly_boundaries$json
 
 
