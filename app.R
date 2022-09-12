@@ -17,24 +17,24 @@ library(readr)
 library(DBI)
 
 
-# This is where we use dotenv library and load all the dotenv functionalities 
+# This is where we use dotenv library and load all the dotenv functionalities
 load_dot_env()
 
-# We load the token from .env file. So you need to create a .env file 
-# in your local and take a copy from .env.example then you can update your 
+# We load the token from .env file. So you need to create a .env file
+# in your local and take a copy from .env.example then you can update your
 # credentials there
 
 key <- Sys.getenv("GPS_TOKEN")
 register_google(key = key)
 
-# Similarly you can store the credential in .env file and we are using 
+# Similarly you can store the credential in .env file and we are using
 # mapboxapi library here
 
 my_token <- Sys.getenv("MAPBOX_TOKEN")
 
 mapboxapi::mb_access_token(my_token, install = TRUE, overwrite = TRUE)
 
-#This is where we connect with postgres and we store all the info in 
+# This is where we connect with postgres and we store all the info in
 # .env file
 
 # Database Name
@@ -49,7 +49,7 @@ db_user <- Sys.getenv("DB_USER")
 db_password <- Sys.getenv("DB_PASSWORD")
 
 # This is where we connect with postgres and we are using two libraries for this
-# DBI and RPostgres we will put the link in description 
+# DBI and RPostgres we will put the link in description
 
 con <- dbConnect(
   RPostgres::Postgres(),
@@ -61,18 +61,18 @@ con <- dbConnect(
 )
 
 # Here we are checking if any new entry has been put in the table. and it will
-# update the map once the new data comes. 
+# update the map once the new data comes.
 
 check_for_update <- function() {
   dbGetQuery(con, 'SELECT MAX(creation) FROM "tabLocations"')
 }
 # This is the query we build to load the data from frappe database
 
-location_query <- 'WITH events AS (SELECT title, type, category, status, 
-description, 
+location_query <- 'WITH events AS (SELECT title, type, category, status,
+description,
 location FROM "tabEvents" WHERE location IS NOT NULL and title IS NOT NULL),
-locations AS (SELECT name, CAST(latitude AS FLOAT8) AS lat, 
-CAST(longitude AS FLOAT8) 
+locations AS (SELECT name, CAST(latitude AS FLOAT8) AS lat,
+CAST(longitude AS FLOAT8)
 AS long, address, city, state, district FROM "tabLocations")
 SELECT * FROM events LEFT JOIN locations ON location = name'
 
@@ -81,15 +81,16 @@ frappe_data <- function() {
 }
 
 # Reading all the data for Assembly level boundaries from Frappe DB
-assembly_boundaries <- 
-  DBI::dbGetQuery(con, 'SELECT json FROM "tabBoundaries" where key = "AC Boundary"')
+ac_boundary_name <- "dfa50ab58f"
+assembly_boundaries <-
+  DBI::dbGetQuery(con, "SELECT key FROM \"tabBoundaries\" tab where key = 'AC Boundary'")
 json_data <- assembly_boundaries$json
 
 
-# List of distinct category Names. We filter this from 
-# the data we get from the postgres and we use this to filter 
+# List of distinct category Names. We filter this from
+# the data we get from the postgres and we use this to filter
 # based on category. We also need to support the markers based on
-# categories 
+# categories
 
 category <- frappe_data() %>%
   dplyr::select(category) %>%
@@ -99,7 +100,7 @@ category <- frappe_data() %>%
 # along with some CSS
 
 ui_box <- shiny::bootstrapPage(
-  # In iphone search was getting zoom and was not able to zoom out 
+  # In iphone search was getting zoom and was not able to zoom out
   # To solve that we use this tag
   tags$head(
     tags$meta(
@@ -320,8 +321,8 @@ server <- function(input, output, session) {
     }
   })
 
-  # This we need to auto connect with the server. 
-  # If the user close the browser for 2-3 minutes and 
+  # This we need to auto connect with the server.
+  # If the user close the browser for 2-3 minutes and
   # comeback then it will restore the session
 
   session$allowReconnect(TRUE)
@@ -339,8 +340,7 @@ server <- function(input, output, session) {
       )
 
     leaflet(filtered_data, options = leafletOptions(zoomControl = FALSE)) %>%
-
-      # Here we have added the support for mapbox and we are adding the 
+      # Here we have added the support for mapbox and we are adding the
       # mapbox tiles to render on the map
 
       addMapboxTiles(
@@ -348,36 +348,30 @@ server <- function(input, output, session) {
         style_id = "streets-v11",
         group = "mapbox"
       ) %>%
-
       # Reset button which is on top left on the map
 
-       leaflet.extras::addResetMapButton() %>%
- 
-      # This function will set the default view to India based on coordinates 
+      leaflet.extras::addResetMapButton() %>%
+      # This function will set the default view to India based on coordinates
 
       leaflet::setView(78.9629, 20.5937, zoom = 5) %>%
-
       # Support for full control
 
       leaflet.extras::addFullscreenControl(
         pseudoFullscreen = TRUE,
         position = "bottomright"
       ) %>%
-
       # This function will keep the zoom in zoom out on the bottom right
 
       htmlwidgets::onRender("function(el, x) {
         L.control.zoom({ position: 'bottomright' }).addTo(this)
     }") %>%
-
       # This feature will be to search location with the help of Google API
 
       leaflet.extras::addSearchGoogle(
         searchOptions(autoCollapse = FALSE, minLength = 8)
-        ) %>%
-
+      ) %>%
       # This is to add control layers on the map
-      
+
       leaflet::addLayersControl(
         position = "bottomleft",
         baseGroups = c("Light"),
