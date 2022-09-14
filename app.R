@@ -80,12 +80,8 @@ frappe_data <- function() {
   dbGetQuery(con, location_query)
 }
 
-# Reading all the data for Assembly level boundaries from Frappe DB
-ac_boundary_name <- "dfa50ab58f"
-assembly_boundaries <-
-  DBI::dbGetQuery(con, "SELECT json FROM \"tabBoundaries\" tab where key = 'AC Boundary'")
-json_data <- assembly_boundaries$json
-
+json_data <- readr::read_file("AC_Boundary.json")
+punjab_data <- readr::read_file("punjab.json")
 
 # List of distinct category Names. We filter this from
 # the data we get from the postgres and we use this to filter
@@ -136,7 +132,8 @@ ui_box <- shiny::bootstrapPage(
       hr(),
       checkboxInput("heat", "Heatmap", FALSE),
       checkboxInput("cluster", "Clustering", TRUE),
-      checkboxInput("district", "District Boundaries", FALSE)
+      checkboxInput("district", "District Boundaries", FALSE),
+      checkboxInput("punjab", "Punjab Boundaries", FALSE)
     )
   )
 )
@@ -219,6 +216,39 @@ server <- function(input, output, session) {
     checkFunc = check_for_update,
     valueFunc = frappe_data
   )
+
+  shiny::observe({
+    proxy <- leaflet::leafletProxy("render_map")
+
+    if (input$punjab) {
+      proxy %>% leaflet.extras::addGeoJSONChoropleth(punjab_data,
+        valueProperty = "AREASQMI",
+        scale = c("white", "red"),
+        mode = "q",
+        steps = 4,
+        padding = c(0.2, 0),
+        labelProperty = "name",
+        popupProperty = propstoHTMLTable(
+          props = c("name", "description"),
+          table.attrs = list(class = "table table-striped table-bordered"),
+          drop.na = TRUE
+        ),
+        color = "#43a858", weight = 1, fillOpacity = 0.7,
+        highlightOptions = highlightOptions(
+          weight = 2, color = "#9c4e57",
+          fillOpacity = 1, opacity = 1,
+          bringToFront = TRUE, sendToBack = TRUE
+        ),
+        pathOptions = pathOptions(
+          showMeasurements = TRUE,
+          measurementOptions =
+            measurePathOptions(imperial = TRUE)
+        )
+      )
+    } else {
+      proxy %>% clearGeoJSON()
+    }
+  })
 
   # This function will load the assembly boundaries on to the map
   # It will check the input box district and remove the geoJson based on
