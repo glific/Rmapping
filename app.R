@@ -127,13 +127,13 @@ ui_box <- shiny::bootstrapPage(
         append("All", as.list(category$category), ),
         # selecting ALL as default option
         selected = "All",
-        multiple = TRUE
+        multiple = FALSE
       ),
       hr(),
       checkboxInput("heat", "Heatmap", FALSE),
       checkboxInput("cluster", "Clustering", TRUE),
       checkboxInput("district", "District Boundaries", FALSE),
-      checkboxInput("punjab", "Punjab Boundaries", FALSE)
+      checkboxInput("punjab", "Gram Panchayat", FALSE)
     )
   )
 )
@@ -228,11 +228,6 @@ server <- function(input, output, session) {
         steps = 4,
         padding = c(0.2, 0),
         labelProperty = "name",
-        popupProperty = propstoHTMLTable(
-          props = c("name", "description"),
-          table.attrs = list(class = "table table-striped table-bordered"),
-          drop.na = TRUE
-        ),
         color = "#43a858", weight = 1, fillOpacity = 0.7,
         highlightOptions = highlightOptions(
           weight = 2, color = "#9c4e57",
