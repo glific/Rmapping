@@ -69,10 +69,16 @@ check_for_update <- function() {
 # This is the query we build to load the data from frappe database
 
 location_query <- 
-'WITH events AS (SELECT title, type, category, status,description, location FROM "tabEvents" 
-                WHERE location IS NOT NULL and title IS NOT NULL),
-locations AS (SELECT name, CAST(latitude AS FLOAT8) AS lat, CAST(longitude AS FLOAT8) AS long, address, city, state, district FROM "tabLocations" WHERE latitude IS NOT NULL and longitude IS NOT NULL)
-SELECT * FROM events LEFT JOIN locations ON location = name'
+'WITH
+events AS (
+  SELECT title, type, category, status,description, location
+  FROM "tabEvents"
+  WHERE location IS NOT NULL and title IS NOT NULL),
+locations AS (
+  SELECT name, CAST(latitude AS FLOAT8) AS lat, CAST(longitude AS FLOAT8) AS long, address, city, state, district
+  FROM "tabLocations"
+  WHERE latitude IS NOT NULL and longitude IS NOT NULL)
+SELECT *FROM events LEFT JOIN locations ON location = name'
 
 frappe_data <- function() {
   dbGetQuery(con, location_query)
