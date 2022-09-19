@@ -74,7 +74,7 @@ location FROM "tabEvents" WHERE location IS NOT NULL and title IS NOT NULL),
 locations AS (SELECT name, CAST(latitude AS FLOAT8) AS lat,
 CAST(longitude AS FLOAT8)
 AS long, address, city, state, district FROM "tabLocations")
-SELECT * FROM events LEFT JOIN locations ON location = name limit 5500'
+SELECT * FROM events LEFT JOIN locations ON location = name'
 
 frappe_data <- function() {
   dbGetQuery(con, location_query)
